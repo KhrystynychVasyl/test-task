@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>test</title>
+</head>
+
+<body>
+    <form>
+        <input type="text" id="addTask">
+        <input type="submit" value="Add" id="addButton"><span id="message"></span>
+        <div class="test"></div>
+        <div class="test2"></div>
+        <div class="list">
+            <input type="checkbox"> Bread<br>
+            <input type="checkbox"> Milk<br>
+            <input type="checkbox"> Meat<br>
+        </div>
+    </form>
+    <script>
+        const addTask = document.querySelector('#addTask');
+        const message = document.querySelector('#message');
+        const list = document.querySelector('.list')
+
+        document.querySelector('#addButton').addEventListener('click', addButtonPressed);
+
+        function addButtonPressed(e) {
+            e.preventDefault();
+
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const serverAnswer = JSON.parse(xhr.responseText)
+                    if (serverAnswer.message === 'Added') {
+                        message.innerHTML = 'Added';
+                        message.style.color = 'green';
+                        document.querySelector('.test').innerHTML = JSON.stringify({ item: addTask.value });
+                        document.querySelector('.test2').innerHTML = JSON.parse(document.querySelector('.test').innerHTML).item;
+                        list.innerHTML += `<input type="checkbox"> ${addTask.value}<br>`;
+                        addTask.value = '';
+                    }
+                    if (serverAnswer.message === 'Already added') {
+                        message.innerHTML = 'Already added';
+                        message.style.color = 'red';
+                        addTask.value = '';
+                    }
+                }
+            }
+            xhr.open('POST', '/api/todo', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ item: addTask.value}))
+        }
+    </script>
+</body>
+
+</html>
